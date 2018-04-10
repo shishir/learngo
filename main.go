@@ -13,24 +13,29 @@ type Coordinate struct {
 	y int
 }
 
-func (coords Coordinate) changeX(value int) Coordinate {
-	return Coordinate{coords.x + value, coords.y}
-}
-func (coords Coordinate) changeY(value int) Coordinate {
-	return Coordinate{coords.x, coords.y + value}
+func (coords Coordinate) change(adder Coordinate) Coordinate {
+	return Coordinate{coords.x + adder.x, coords.y + adder.y}
 }
 
 // Rover encapsulate the rover class
 type Rover struct {
-	coords    Coordinate
-	direction string
+	coords      Coordinate
+	direction   string
+	identityMap map[string]Coordinate
 }
 
 // NewRover constructs new rover
 func NewRover(x int, y int, direction string) *Rover {
 	coords := Coordinate{x, y}
-	return &Rover{coords, direction}
+	m := map[string]Coordinate{
+		"N": Coordinate{0, -1},
+		"E": Coordinate{1, 0},
+		"S": Coordinate{0, 1},
+		"W": Coordinate{-1, 0},
+	}
+	return &Rover{coords, direction, m}
 }
+
 func (rover Rover) valid() {
 	correct := false
 	for _, allowedDirection := range rover.validDirections() {
@@ -53,17 +58,7 @@ func (rover *Rover) turnRight() {
 }
 
 func (rover *Rover) move() {
-	switch rover.direction {
-	case "N":
-		rover.coords = rover.coords.changeY(-1)
-	case "E":
-		rover.coords = rover.coords.changeX(1)
-	case "S":
-		rover.coords = rover.coords.changeY(1)
-	case "W":
-		rover.coords = rover.coords.changeX(-1)
-	}
-
+	rover.coords = rover.coords.change(rover.identityMap[rover.direction])
 }
 
 func (rover *Rover) turn(sign int) {
